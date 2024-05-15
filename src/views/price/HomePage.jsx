@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState,useCallback } from 'react'
 import { useEffect } from 'react';
 import { Link,useNavigate } from 'react-router-dom';
 import { useAuth } from '../other/AuthContext';
@@ -12,19 +12,11 @@ export default function HomePage() {
   const [deals, setDeals] = useState(JSON.parse(localStorage.getItem("deals")) || []);
   const query = useRef("");
   const [queryData, setQuery] = useState(JSON.parse(localStorage.getItem("query")) ||"");
-  const handleChange = (event) => {
-    event.preventDefault();
-    setQuery(query.current.value);
-  }
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setQuery(query.current.value);
-    fetchData()
-  }
+
   const fetchData = async () => {
     setSpinner(true);
     try {
-      const response = await fetch(`https://rsg-price.vercel.app/api/search/?link=${queryData}`);
+      const response = await fetch(`https://rsg-price.vercel.app/api/search/?link=${query.current.value}`);
       const result = await response.json();
       if("error" in result){
         toastWarning("Maximum search limit reached try after some time")
@@ -39,13 +31,9 @@ export default function HomePage() {
     }
     setSpinner(false);
   };
+  
   useEffect(() => {
-    localStorage.setItem("query", JSON.stringify(queryData));
-    if(queryData)
-    fetchData();
-  }, [queryData]);
-  useEffect(() => {
-    const fetchData = async () => {
+    const fetchDeals = async () => {
         startLoad();
       try {
         if (deals.length>0||queryData) stopLoad()
@@ -59,8 +47,36 @@ export default function HomePage() {
       }
         stopLoad();
     };
+    if(queryData)
     fetchData();
+    fetchDeals();
   }, []);
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setQuery(query.current.value);
+    localStorage.setItem("query", JSON.stringify(query.current.value))
+    if(query.current.value){
+      fetchData()
+    }
+  }
+const handleChange=()=>{
+    localStorage.setItem("query", JSON.stringify(query.current.value))
+    if(query.current.value){
+      fetchData()
+      }
+  }
+const debounce=(func)=>{
+  let timer;
+  return function(...args){
+    const context=this;
+    if(timer) clearTimeout(timer);
+    timer=setTimeout(()=>{
+      timer=null;
+      func.apply(context,args);
+    },300)
+  }
+}
+const optimized=useCallback(debounce(handleChange),[])
  
   return (
     <MyLoader>
@@ -74,7 +90,7 @@ export default function HomePage() {
               <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
             </svg>
           </div>
-          <input type="search" id="default-search" ref={query} value={queryData} onChange={handleChange} className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter product name or link" autoComplete='off'  />
+          <input type="search" id="default-search" ref={query} value={queryData} onChange={()=>{setQuery(query.current.value);optimized()}} className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter product name or link" autoComplete='off'  required/>
           <button type="submit" className="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
         </div>
       </form>
@@ -118,9 +134,9 @@ export default function HomePage() {
       
         <>
         <h1 className="my-2 text-2xl font-bold text-black dark:text-white text-left">Today Deals</h1>
-        <div className="my-2 grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="my-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {deals.map((movie, index) => (
-            <div key={index} className=" w-72 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mr-4 mx-auto overflow-hidden">
+            <div key={index} className=" max:w-80 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700  mx-auto overflow-hidden">
               <a onClick={()=>{navigate(`/product/${movie["product"].slug}`)}}>
                 <img className="rounded-t-lg   h-40 w-auto" src={movie["product"].image} alt="img" />
                 <div className="p-2">
