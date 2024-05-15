@@ -2,14 +2,17 @@ import { useEffect, useState } from 'react';
 import React from 'react'
 import { toastSuccess,toastWarning } from '../components/Notifications';
 import { useParams, Link,useNavigate } from 'react-router-dom'
+import { useAuth } from '../other/AuthContext';
 import { generateToken } from '../../firebase';
+import MyLoader from '../MyLoader'
 export default function ProductPage() {
     const navigate=useNavigate();
+    const {startLoad,stopLoad}=useAuth();
     const params = useParams();
     const [data, setData] = useState(null);
     useEffect(() => {
         const fetchData = async () => {
-            //   startLoad();
+              startLoad();
             try {
                 const response = await fetch(`https://rsg-price.vercel.app/api/product/?link=${params.id}`);
                 const result = await response.json();
@@ -18,12 +21,12 @@ export default function ProductPage() {
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
-            //   stopLoad();
+              stopLoad();
         };
         fetchData();
     }, [params.id]);
     const setAlert = async () => {
-        //   startLoad();
+          startLoad();
         if (localStorage.getItem('token') == null) navigate('/login')
         else{
             generateToken();
@@ -52,9 +55,12 @@ export default function ProductPage() {
           } catch (error) {
             
           }}
-        //   stopLoad();
+          stopLoad();
     };
     return (
+        <MyLoader>
+
+       
         <main>
             <center>
                 {data ?
@@ -79,13 +85,13 @@ export default function ProductPage() {
                                 </div>
                                 <div className='mr-4 text-left text-white '>
                                     <p>
-                                        <a className="focus:outline-none  bg-yellow-600 dark:bg-yellow-500 hover:bg-yellow-500 dark:hover:bg-yellow-600 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900">Buy on {data["store"]["name"]}</a>
-                                        <a onClick={()=>{setAlert()}} className="focus:outline-none  bg-blue-800 dark:bg-blue-600  hover:bg-blue-600 dark:hover:bg-blue-900 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900">Set price alert</a></p>
+                                        <button className="focus:outline-none  bg-yellow-600 dark:bg-yellow-500 hover:bg-yellow-500 dark:hover:bg-yellow-600  font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 ">Buy on {data["store"]["name"]}</button>
+                                        <button onClick={()=>{setAlert()}} className="focus:outline-none  bg-blue-800 dark:bg-blue-600  hover:bg-blue-600 dark:hover:bg-blue-900 focus:ring-0 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900">Set price alert</button></p>
 
                                 </div>
                             </div>
                         </section>
-                        <iframe src={`https://pricehistoryapp.com/embed/${data["slug"]}`} frameborder="0" width="100%" height="450"></iframe>
+                        <iframe src={`https://pricehistoryapp.com/embed/${data["slug"]}`} frameBorder="0" width="100%" height="450"></iframe>
                         <p className='text-left my-4 dark:text-white'>You can check the price history of {data["name"]} above. This product price is {data["price"]} but the lowest price is {data["lowest_price"]} and the MRP is {data["mrp"]}. The average and highest price are {data["average_price"]} and {data["highest_price"]} respectively.</p>
                         <h1 className=" text-2xl font-bold text-black dark:text-white text-left">Similar Products</h1>
                         <div className="flex overflow-x-auto">
@@ -94,18 +100,18 @@ export default function ProductPage() {
                                     <Link to={`/product/${movie.slug}`}>
                                         <img className="rounded-t-lg h-40 w-auto" src={movie.image} alt="img" />
                                         <div className="p-2">
-                                            <h5 className="mb-2 text-1xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-3 text-left">{movie.name}</h5>
+                                            <h5 className="mb-2 text-1xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-3 text-left h-18">{movie.name}</h5>
 
                                             <div className=' text-left max-w-4xl text-gray-700 text-lg dark:text-white' >
                                                 <p>
-                                                    <a className={`text-white ${data.rating > 3 ? "bg-green-600" : "bg-red-600"} text-xs rounded-lg  px-2.5 py-1 font-bold  `}>{data.rating}</a><a className='text-xs'> ({data.rating_count} ratings)</a>
+                                                    <a className={`text-white ${movie.rating > 3 ? "bg-green-600" : "bg-red-600"} text-xs rounded-lg  px-2.5 py-1 font-bold  `}>{movie.rating}</a><a className='text-xs'> ({movie.rating_count} ratings)</a>
                                                 </p>
                                                 <p>
-                                                    <a className='text-xl font-bold text-black dark:text-white'>{data["country"]["currency_icon"]}{data["price"]}  </a>
-                                                    <a className='text-sm font-medium text-slate-500 dark:text-gray-400  text-decoration-line: line-through'>  {data["country"]["currency_icon"]}{data["highest_price"]}</a>
-                                                    <a className='text-sm font-bold text-green-700  dark:text-green-500 '>  {data["discount"].toFixed(0)}% off</a>
+                                                    <a className='text-xl font-bold text-black dark:text-white'>{movie["country"]["currency_icon"]}{movie["price"]}  </a>
+                                                    <a className='text-sm font-medium text-slate-500 dark:text-gray-400  text-decoration-line: line-through'>  {movie["country"]["currency_icon"]}{movie["highest_price"]}</a>
+                                                    <a className='text-sm font-bold text-green-700  dark:text-green-500 '>  {movie["discount"].toFixed(0)}% off</a>
                                                 </p>
-                                                <p className='text-xs font-medium text-slate-500 dark:text-gray-400'>{data["store"]["name"]}</p>
+                                                <p className='text-xs font-medium text-slate-500 dark:text-gray-400'>{movie["store"]["name"]}</p>
                                             </div>
                                         </div>
                                     </Link>
@@ -119,18 +125,18 @@ export default function ProductPage() {
                                     <Link to={`/product/${movie["product"].slug}`}>
                                         <img className="rounded-t-lg  h-40 w-auto" src={movie["product"].image} alt="img" />
                                         <div className="p-2">
-                                            <h5 className="mb-2 text-1xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-3 text-left">{movie["product"].name}</h5>
+                                            <h5 className="mb-2 text-1xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-3 text-left h-18">{movie["product"].name}</h5>
 
                                             <div className=' text-left max-w-4xl text-gray-700 text-lg dark:text-white' >
                                                 <p>
-                                                    <a className={`text-white ${data.rating > 3 ? "bg-green-600" : "bg-red-600"} text-xs rounded-lg  px-2.5 py-1 font-bold  `}>{data.rating}</a><a className='text-xs'> ({data.rating_count} ratings)</a>
+                                                    <a className={`text-white ${movie["product"].rating > 3 ? "bg-green-600" : "bg-red-600"} text-xs rounded-lg  px-2.5 py-1 font-bold  `}>{movie["product"].rating}</a><a className='text-xs'> ({movie["product"].rating_count} ratings)</a>
                                                 </p>
                                                 <p>
-                                                    <a className='text-xl font-bold text-black dark:text-white'>{data["country"]["currency_icon"]}{data["price"]}  </a>
-                                                    <a className='text-sm font-medium text-slate-500 dark:text-gray-400  text-decoration-line: line-through'>  {data["country"]["currency_icon"]}{data["highest_price"]}</a>
-                                                    <a className='text-sm font-bold text-green-700  dark:text-green-500 '>  {data["discount"].toFixed(0)}% off</a>
+                                                    <a className='text-xl font-bold text-black dark:text-white'>{movie["product"]["country"]["currency_icon"]}{movie["price"]}  </a>
+                                                    <a className='text-sm font-medium text-slate-500 dark:text-gray-400  text-decoration-line: line-through'>  {movie["product"]["country"]["currency_icon"]}{movie["highest_price"]}</a>
+                                                    <a className='text-sm font-bold text-green-700  dark:text-green-500 '>  {movie["discount"].toFixed(0)}% off</a>
                                                 </p>
-                                                <p className='text-xs font-medium text-slate-500 dark:text-gray-400'>{data["store"]["name"]}</p>
+                                                <p className='text-xs font-medium text-slate-500 dark:text-gray-400'>{movie["store"]["name"]}</p>
                                             </div>
                                         </div>
                                     </Link>
@@ -144,5 +150,6 @@ export default function ProductPage() {
 
             </center>
         </main>
+        </MyLoader>
     )
 }
