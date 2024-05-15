@@ -133,14 +133,14 @@ const optimized=useCallback(debounce(handleChange),[])
         queryData?"":
       
         <>
-        <h1 className="my-2 text-2xl font-bold text-black dark:text-white text-left">Today Deals</h1>
+        <h1 className="my-4 text-2xl font-bold text-black dark:text-white text-left">Today Deals</h1>
         <div className="my-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {deals.map((movie, index) => (
-            <div key={index} className=" max:w-80 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700  mx-auto overflow-hidden">
+            <div key={index} className=" w-full md:max-w-80 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700  mx-auto overflow-hidden">
               <a onClick={()=>{navigate(`/product/${movie["product"].slug}`)}}>
                 <img className="rounded-t-lg   h-40 w-auto" src={movie["product"].image} alt="img" />
                 <div className="p-2">
-                  <h5 className="mb-2 text-1xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-3 h-18 text-left">{movie["product"].name}</h5>
+                  <h5 className="mb-2 text-1xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-3 md:h-18 text-left">{movie["product"].name}</h5>
 
                   <div className=' text-left max-w-4xl text-gray-700 text-lg dark:text-white' >
                     <p>
