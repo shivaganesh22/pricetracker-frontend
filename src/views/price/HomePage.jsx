@@ -135,7 +135,7 @@ const optimized=useCallback(debounce(handleChange),[])
         <>
         <h1 className="my-4 text-2xl font-bold text-black dark:text-white text-left">Today Deals</h1>
         <div className="my-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {deals.map((movie, index) => (
+          {!deals["error"] && deals.map((movie, index) => (
             <div key={index} className=" w-full md:max-w-80 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700  mx-auto overflow-hidden">
               <a onClick={()=>{navigate(`/product/${movie["product"].slug}`)}}>
                 <img className="rounded-t-lg   h-40 w-auto" src={movie["product"].image} alt="img" />
